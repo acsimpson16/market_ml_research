@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "market_ml_research"
+version = "0.1.0"
+description = "Machine learning research pipeline for financial market prediction"
+requires-python = ">=3.10"
+
+
+[tool.setuptools.packages.find]
+where = ["src"]
