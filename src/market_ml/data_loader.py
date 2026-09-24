@@ -37,11 +37,12 @@ class DataLoader:
             raise FileNotFoundError(f"No data found for {self.ticker}. Please download the data first.")
     
     def check_data(self):
-        validation = {'Number of NaNs': self.data.isna().sum().sum(),
+        validation = {'Missing Values': self.data.isna().sum().sum(),
                   'Number of Rows': len(self.data),
                   'Number of Columns': len(self.data.columns),
                   'Start': pd.to_datetime(self.data.index.min()),
                   'End': pd.to_datetime(self.data.index.max()),
+                  'Duplicate Dates': self.data.index.duplicated().sum()
                   
                   
     }   
