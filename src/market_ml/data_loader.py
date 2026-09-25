@@ -3,19 +3,20 @@ import pandas as pd
 import yfinance as yf
 import os
 
+
+
 class DataLoader:
-    def __init__(self, ticker=None, start_date=None, end_date=None, data_path=None):
+    def __init__(self, ticker=None, period=None, interval=None, data_path=None):
         self.ticker = ticker
-        self.start_date = start_date
-        self.end_date = end_date
+        self.period = period
+        self.interval = interval
         self.data = None
         self.data_path = "data/raw"
         
 
     def download_data(self):
-        #print(f"Downloading data for {self.ticker} from {self.start_date} to {self.end_date}")
-        stock = yf.Ticker(self.ticker)
-        data = stock.history(start=self.start_date, end=self.end_date)
+        data = yf.download(self.ticker, period=self.period, interval=self.interval)
+        data.columns = data.columns.get_level_values(0) #data has multi-index, second is the ticker which is being removed here. 
         self.data = data
         print(f"Downloaded data for {self.ticker}")
         return self.data
@@ -40,7 +41,7 @@ class DataLoader:
         validation = {'Missing Values': self.data.isna().sum().sum(),
                   'Number of Rows': len(self.data),
                   'Number of Columns': len(self.data.columns),
-                  'Start': pd.to_datetime(self.data.index.min()),
+                  'Start': pd.to_datetime(self.data.min()),
                   'End': pd.to_datetime(self.data.index.max()),
                   'Duplicate Dates': self.data.index.duplicated().sum()
                   
