@@ -1,51 +1,98 @@
 import numpy as np
 import pandas as pd
 import yfinance as yf
+from market_ml.config import * 
 import os
+from IPython.display import display 
+
 
 
 
 class DataLoader:
-    def __init__(self, ticker=None, period=None, interval=None, data_path=None):
-        self.ticker = ticker
+    def __init__(self, 
+                 tickers: list[str] | None =None, 
+                 period: str | None=None, 
+                 interval: str | None=None
+                 ):
+        self.tickers = tickers
         self.period = period
         self.interval = interval
         self.data = None
-        self.data_path = "data/raw"
         
 
-    def download_data(self):
-        data = yf.download(self.ticker, period=self.period, interval=self.interval)
-        data.columns = data.columns.get_level_values(0) #data has multi-index, second is the ticker which is being removed here. 
-        self.data = data
-        print(f"Downloaded data for {self.ticker}")
-        return self.data
-    
-    def save_data(self):
-        if self.data is not None:
-            os.makedirs(self.data_path, exist_ok=True)
-            self.data.to_csv(self.data_path + f"{self.ticker}_data.csv")
-            print(f"Data saved for {self.ticker}")
-        else:
-            raise RuntimeError("Download data before saving.")
+    def download_data(self) -> pd.DataFrame:
+        '''
+        Downloads, processes, and optionally saves market data for a given list of tickers 
+        over a specified period and interval.
+        '''
         
-    def load_data(self):
-        if os.path.exists(self.data_path + f"{self.ticker}_data.csv"):
-            self.data = pd.read_csv(self.data_path + f"{self.ticker}_data.csv", index_col=0, parse_dates=True)
-            print(f"Data loaded for {self.ticker}")
+        raw_data = yf.download(self.tickers, period=self.period, interval=self.interval)
+        raw_data.to_parquet(RAW_DATA_DIR / "market_data.parquet")
+        print(f"Downloaded data for {self.tickers}")
+
+        return raw_data
+    
+    def process_data(self, raw_data: pd.DataFrame) -> pd.DataFrame: 
+        processed_data = raw_data.stack(level="Ticker", future_stack=True).reset_index()
+        processed_data["Sector"] = processed_data["Ticker"].map(TICKER_SECTOR)
+        processed_data = processed_data[['Date', 'Ticker', 'Sector', 'Close', 'High', 'Low', 'Open', 'Volume']]
+        self.data = processed_data
+        print(f'Processed data for {self.tickers}')
+        #if self.save_data:
+        #    processed_data.to_parquet(PROCESSED_DATA_DIR / "market_data.parquet")
+        #    print(f'Saved data for {self.tickers}')
+
+        return self.data
+
+    def check_data(self, data: pd.DataFrame, ticker_summary: bool = False) ->  dict | tuple[dict, pd.DataFrame]:
+        
+        validation = {
+            "Missing Values": data.isna().sum().sum(),
+            "Number of Rows": len(data),
+            "Number of Columns": len(data.columns),
+            "Start": data.index.min(),
+            "End": data.index.max(),
+            "Duplicate Rows": data.duplicated().sum(),
+            "Duplicate Date/Ticker": data.duplicated(subset=["Date", "Ticker"]).sum(),
+        }
+        print(' '*40)
+        print('DATA VALIDATION:')
+        
+        for key, value in validation.items():
+            print(f"{key}: {value}")
+        #display(validation)
+
+        if ticker_summary:
+            ticker_validation = (
+                data.groupby("Ticker")
+                .agg(
+                    Rows=("Ticker", "size"),
+                    Start=("Date", "min"),
+                    End=("Date", "max"),
+                    Missing_Close=("Close", lambda x: x.isna().sum())
+                )
+            )
+            print(' '*40)
+            print('ticker_validation')
+            display(ticker_validation)
+            return 
+
+        return 
+
+    def save_data(self):
+        self.data.to_parquet(PROCESSED_DATA_DIR / "market_data.parquet")
+        print(f'Process data saved for {self.tickers}')
+        return
+    
+    def load_data(self) -> pd.DataFrame:
+        """
+        Load processed market data from Parquet.
+
+        """
+        if os.path.exists(PROCESSED_DATA_DIR/"market_data.parquet"):
+            self.data = pd.read_parquet(PROCESSED_DATA_DIR/"market_data.parquet")
+            print(f"Data loaded for {self.tickers}")
             return self.data
         else:
-            raise FileNotFoundError(f"No data found for {self.ticker}. Please download the data first.")
+            raise FileNotFoundError(f"No data found for {self.tickers}. Please download the data first.")
     
-    def check_data(self):
-        validation = {'Missing Values': self.data.isna().sum().sum(),
-                  'Number of Rows': len(self.data),
-                  'Number of Columns': len(self.data.columns),
-                  'Start': pd.to_datetime(self.data.min()),
-                  'End': pd.to_datetime(self.data.index.max()),
-                  'Duplicate Dates': self.data.index.duplicated().sum()
-                  
-                  
-    }   
-        #validation_df = pd.DataFrame(index=validation.keys(), validation)
-        return validation
