@@ -38,46 +38,23 @@ class DataLoader:
         processed_data = processed_data[['Date', 'Ticker', 'Sector', 'Close', 'High', 'Low', 'Open', 'Volume']]
         self.data = processed_data
         print(f'Processed data for {self.tickers}')
-        #if self.save_data:
-        #    processed_data.to_parquet(PROCESSED_DATA_DIR / "market_data.parquet")
-        #    print(f'Saved data for {self.tickers}')
-
         return self.data
 
-    def check_data(self, data: pd.DataFrame, ticker_summary: bool = False) ->  dict | tuple[dict, pd.DataFrame]:
-        
-        validation = {
-            "Missing Values": data.isna().sum().sum(),
-            "Number of Rows": len(data),
-            "Number of Columns": len(data.columns),
-            "Start": data.index.min(),
-            "End": data.index.max(),
-            "Duplicate Rows": data.duplicated().sum(),
-            "Duplicate Date/Ticker": data.duplicated(subset=["Date", "Ticker"]).sum(),
-        }
-        print(' '*40)
-        print('DATA VALIDATION:')
-        
-        for key, value in validation.items():
-            print(f"{key}: {value}")
-        #display(validation)
-
-        if ticker_summary:
-            ticker_validation = (
-                data.groupby("Ticker")
-                .agg(
-                    Rows=("Ticker", "size"),
-                    Start=("Date", "min"),
-                    End=("Date", "max"),
-                    Missing_Close=("Close", lambda x: x.isna().sum())
-                )
+    def check_data(self, data: pd.DataFrame, ) ->  pd.DataFrame:
+        '''
+        Validate market data at ticker level
+        '''
+        ticker_validation = (
+            data.groupby("Ticker")
+            .agg(
+                Rows=("Ticker", "size"),
+                Start=("Date", "min"),
+                End=("Date", "max"),
+                Missing_Close=("Close", lambda x: x.isna().sum()),
             )
-            print(' '*40)
-            print('ticker_validation')
-            display(ticker_validation)
-            return 
-
-        return 
+        )
+        
+        return ticker_validation
 
     def save_data(self):
         self.data.to_parquet(PROCESSED_DATA_DIR / "market_data.parquet")
