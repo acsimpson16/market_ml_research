@@ -25,7 +25,6 @@ def test_check_data():
     dl = DataLoader(tickers=test_tickers, period=test_period, interval=test_interval)
     raw_data = dl.download_data()
     processed_data = dl.process_data(raw_data)
-
     
     validation = dl.check_data(processed_data)
 
