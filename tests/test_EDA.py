@@ -24,3 +24,15 @@ def test_calculate_volatility():
     assert "Daily_Return" in volatility.columns, "Volatility data should contain 'Daily_Return' column"
     assert "Volatility_20D" in volatility.columns, "Volatility data should contain 'Volatility' column"
 
+
+def test_calculate_drawdown():
+    dl = DataLoader(tickers=test_tickers, period="10y", interval="1d")
+    data = dl.load_data()
+    returns = calculate_returns(data)
+    drawdown = calculate_drawdown(returns)
+    assert not returns.empty, "Returns data should not be empty"
+    assert "Daily_Return" in drawdown.columns, "drawdown dataframe should contain 'Daily_Return' column" 
+    assert "Drawdown" in drawdown.columns, "drawdown dataframe should contain 'Drawdown'column"
+    assert (drawdown["Drawdown"].dropna() <= 0.0).all(), 'Drawdown values should not be positive' 
+
+
