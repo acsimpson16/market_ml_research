@@ -10,13 +10,15 @@ from IPython.display import display
 
 class DataLoader:
     def __init__(self, 
-                 tickers: list[str] | None =None, 
-                 period: str | None=None, 
-                 interval: str | None=None
+                tickers: list[str] | None =None, 
+                period: str | None=None, 
+                interval: str | None=None,
+                file_name: str | None=None
                  ):
         self.tickers = tickers
         self.period = period
         self.interval = interval
+        self.filename = file_name 
         self.data = None
         
 
@@ -27,7 +29,7 @@ class DataLoader:
         '''
         
         raw_data = yf.download(self.tickers, period=self.period, interval=self.interval)
-        raw_data.to_parquet(RAW_DATA_DIR / "market_data.parquet")
+        raw_data.to_parquet(RAW_DATA_DIR / self.filename)
         print(f"Downloaded data for {self.tickers}")
 
         return raw_data
@@ -57,7 +59,7 @@ class DataLoader:
         return ticker_validation
 
     def save_data(self):
-        self.data.to_parquet(PROCESSED_DATA_DIR / "market_data.parquet")
+        self.data.to_parquet(PROCESSED_DATA_DIR / self.filename)
         print(f'Process data saved for {self.tickers}')
         return
     
@@ -66,8 +68,8 @@ class DataLoader:
         Load processed market data from Parquet.
 
         """
-        if os.path.exists(PROCESSED_DATA_DIR/"market_data.parquet"):
-            self.data = pd.read_parquet(PROCESSED_DATA_DIR/"market_data.parquet")
+        if os.path.exists(PROCESSED_DATA_DIR/self.filename):
+            self.data = pd.read_parquet(PROCESSED_DATA_DIR/self.filename)
             print(f"Data loaded for {self.tickers}")
             return self.data
         else:
