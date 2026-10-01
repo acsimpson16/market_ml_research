@@ -7,7 +7,6 @@ from IPython.display import display
 
 
 
-
 class DataLoader:
     def __init__(self, 
                 tickers: list[str] | None =None, 

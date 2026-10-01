@@ -6,18 +6,28 @@ test_tickers = ["AAPL", "NVDA"]
 test_period = "10y"
 test_interval = "1d"
 
+stock_data = pd.DataFrame({"Date": pd.to_datetime(["2025-01-01","2025-01-02","2025-01-03",]),
+                           "Ticker": ["AAPL", "AAPL", "AAPL"],
+                           "Close": [100, 105, 110], 
+                           "Volume":[100, 200, 300]
+                            })
+benchmark_data = pd.DataFrame({"Date": pd.to_datetime(["2025-01-01","2025-01-02","2025-01-03",] * 2),
+                               "Ticker": ["SPY"] * 3 + ["QQQ"] * 3,
+                               "Close": [100, 110, 121, 200, 220, 242], "Volume":[200, 400, 200, 600, 300, 250]
+                               })
+
+
+
 
 
 def test_calculate_returns():
-    dl = DataLoader(tickers=test_tickers, period="10y", interval="1d")
-    data = dl.load_data()
+    data = stock_data
     returns = calculate_returns(data)
     assert not data.empty, "Downloaded data should not be empty"
     assert "Daily_Return" in returns.columns, "Daily Returns data should contain 'Daily_Return' column"
 
 def test_calculate_volatility():
-    dl = DataLoader(tickers=test_tickers, period="10y", interval="1d")
-    data = dl.load_data()
+    data = stock_data
     returns = calculate_returns(data)
     volatility = calculate_rolling_volatility(returns, window=20)
     assert not returns.empty, "Returns data should not be empty"
@@ -26,8 +36,7 @@ def test_calculate_volatility():
 
 
 def test_calculate_drawdown():
-    dl = DataLoader(tickers=test_tickers, period="10y", interval="1d")
-    data = dl.load_data()
+    data = stock_data
     returns = calculate_returns(data)
     drawdown = calculate_drawdown(returns)
     assert not returns.empty, "Returns data should not be empty"

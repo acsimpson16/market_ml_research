@@ -100,3 +100,18 @@ class FeatureEngineer:
             )
 
         return self.data
+
+    def add_target_variable(self, horizon=5):
+
+        '''
+        Calculates the future returns and target variable over a given horizon. 
+        '''
+
+        self.data[f"Future_Return_{horizon}D"] = self.data.groupby("Ticker")["Close"].shift(-horizon)/ self.data["Close"] - 1 
+    
+
+        self.data[f"Target_{horizon}D"] = (self.data[f"Future_Return_{horizon}D"] > 0).astype(int)
+
+        self.data.loc[self.data[f"Future_Return_{horizon}D"].isna(),f"Target_{horizon}D"] = pd.NA #want last 5 rows to be missing data as there is no future information to calculate this. 
+
+        return self.data 
