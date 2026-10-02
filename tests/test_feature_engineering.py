@@ -98,5 +98,17 @@ def test_benchmark_returns():
     fe = FeatureEngineer(sdata, bdata)
     benchmark_returns = fe.add_benchmark_returns()
 
-    assert "SPY_Return" in benchmark_returns.columns
-    assert "QQQ_Return" in benchmark_returns.columns
+    assert "SPY_Return" in benchmark_returns.columns, "Benchmark returns should have 'SPY Return' column"
+    assert "QQQ_Return" in benchmark_returns.columns, "Benchmark returns should have 'QQQ_Returns' column"
+
+    assert not benchmark_returns.empty, "Benchmark returns should not be empty"
+
+def test_target_variable(horizon=5):
+    sdata = stock_data
+
+    fe = FeatureEngineer(sdata)
+    target = fe.add_target_variable()
+
+    assert not target.empty, "target variable should not be empty"
+    assert "Future_Return_5D" in target.columns, "target should have 'Future_Returns_5D' column"
+    assert "Target_5D" in target.columns, "target should have 'Target_5D' column"

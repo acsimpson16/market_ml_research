@@ -10,14 +10,17 @@ class FeatureEngineer:
     def __init__(
         self,
         data: pd.DataFrame,
-        benchmark_data: pd.DataFrame | None = None
+        benchmark_data: pd.DataFrame | None = None,
+        filename: str | None=None
     ):
         self.data = data.copy()
-
+        self.tickers = self.data
         if benchmark_data is not None:
             self.benchmark_data = benchmark_data.copy()
         else:
             self.benchmark_data = None
+
+        self.filename = filename
 
     def add_daily_returns(self):
         '''
@@ -115,3 +118,16 @@ class FeatureEngineer:
         self.data.loc[self.data[f"Future_Return_{horizon}D"].isna(),f"Target_{horizon}D"] = pd.NA #want last 5 rows to be missing data as there is no future information to calculate this. 
 
         return self.data 
+
+    def save_features(self):
+        self.data.to_parquet(PROCESSED_DATA_DIR / self.filename)
+        print(f"Features data saved for {self.tickers}.")
+        return
+
+    def load_features(self):
+        if os.path.exists(PROCESSED_DATA_DIR/self.filename):
+                    self.data = pd.read_parquet(PROCESSED_DATA_DIR/self.filename)
+                    print(f"Data loaded for {self.tickers}.")
+                    return self.data
+        else:
+            raise FileNotFoundError(f"No data found for {self.tickers}. Please download the data first.")
