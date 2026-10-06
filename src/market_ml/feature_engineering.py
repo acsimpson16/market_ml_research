@@ -14,6 +14,7 @@ class FeatureEngineer:
         filename: str | None=None
     ):
         self.data = data.copy()
+        self.data = self.data.sort_values(["Ticker", "Date"]).reset_index(drop=True)
         self.tickers = self.data
         if benchmark_data is not None:
             self.benchmark_data = benchmark_data.copy()
@@ -21,6 +22,7 @@ class FeatureEngineer:
             self.benchmark_data = None
 
         self.filename = filename
+
 
     def add_daily_returns(self):
         '''
@@ -113,9 +115,9 @@ class FeatureEngineer:
         self.data[f"Future_Return_{horizon}D"] = self.data.groupby("Ticker")["Close"].shift(-horizon)/ self.data["Close"] - 1 
     
 
-        self.data[f"Target_{horizon}D"] = (self.data[f"Future_Return_{horizon}D"] > 0).astype(int)
+        #self.data[f"Target_{horizon}D"] = (self.data[f"Future_Return_{horizon}D"] > 0).astype(int)
 
-        self.data.loc[self.data[f"Future_Return_{horizon}D"].isna(),f"Target_{horizon}D"] = pd.NA #want last 5 rows to be missing data as there is no future information to calculate this. 
+        self.data.loc[self.data[f"Future_Return_{horizon}D"].isna()] = pd.NA #want last 5 rows to be missing data as there is no future information to calculate this. 
 
         return self.data 
 
