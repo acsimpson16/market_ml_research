@@ -24,37 +24,40 @@ class FeatureEngineer:
         self.filename = filename
 
 
+    
     def add_daily_returns(self):
         '''
-        Calculates and adds daily returns.
+        Calculate daily returns separately for each ticker.
         '''
 
-        self.data['Daily_Return'] = self.data.groupby("Ticker")["Close"].pct_change()
+        self.data["Daily_Return"] = (
+        self.data.groupby("Ticker")["Close"].pct_change())
         return self.data
 
 
     def add_return_feature(self, period=5):
         '''
-        Calculates and adds returns for a given period.
+        Calculate trailing returns over a given number of trading sessions.
         '''
-
-        self.data[f"Return_{period}D"] = self.data.groupby("Ticker")["Close"].pct_change(periods=period)
+        self.data[f"Return_{period}D"] = (
+        self.data.groupby("Ticker")["Close"].pct_change(periods=period))
         return self.data
 
     def add_volatility_feature(self, w=20):
         '''
-        Calculates and adds returns for a given period.
+        Calculate rolling standard deviation of daily returns.
         '''
-    
-        self.data[f"Volatility_{w}D"] = self.data.groupby("Ticker")['Daily_Return'].rolling(w).std().reset_index(level=0, drop=True)
+        self.data[f"Volatility_{w}D"] = (self.data.groupby("Ticker")["Daily_Return"].transform(lambda x: x.rolling(window=w).std()))
         return self.data
+
 
     def add_SMA_feature(self, w=20):
         '''
-        Calculates the moving average for a given window size
+        Calculate a trailing simple moving average of closing prices.
         '''
-        self.data[f"SMA_{w}D"] = self.data.groupby("Ticker")["Close"].transform(lambda x: x.rolling(window=w).mean())
+        self.data[f"SMA_{w}D"] = (self.data.groupby("Ticker")["Close"].transform(lambda x: x.rolling(window=w).mean()))
         return self.data
+
 
     def add_price_relative_to_sma(self,w=20):
         '''
@@ -104,6 +107,9 @@ class FeatureEngineer:
                 how="left"
             )
 
+
+        print("Rows:", len(self.data))
+        print("Duplicate ticker/date pairs:", self.data.duplicated(["Ticker", "Date"]).sum())
         return self.data
 
     def add_target_variable(self, horizon=5):
@@ -112,8 +118,10 @@ class FeatureEngineer:
         Calculates the future returns and target variable over a given horizon. 
         '''
 
-        self.data[f"Future_Return_{horizon}D"] = self.data.groupby("Ticker")["Close"].shift(-horizon)/ self.data["Close"] - 1 
-    
+        target_col = f"Future_Return_{horizon}D"
+
+        self.data[target_col] = (
+        self.data.groupby("Ticker")["Close"].shift(-horizon)/ self.data["Close"] - 1)   
 
         #self.data[f"Target_{horizon}D"] = (self.data[f"Future_Return_{horizon}D"] > 0).astype(int)
 
