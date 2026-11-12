@@ -12,7 +12,7 @@ def test_split_chronological_data():
 
     test_df = pd.DataFrame({"Date":dates, "Ticker":ticker, "Close":close})
 
-    x, y = split_chronological_data(test_df, test_split)
+    x, y, split_date = split_chronological_data(test_df, test_split)
 
     
     assert not test_df.empty, "Dataframe can not be empty"
