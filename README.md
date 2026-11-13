@@ -6,24 +6,6 @@
 
 A Python-based machine learning project exploring whether historical market data and engineered financial features can help predict short-term stock returns.
 
-market_ml_research/
-│
-├── .github/
-│   └── workflows/
-│       └── ci.yml
-│
-├── .vscode/
-├── data/
-├── notebooks/
-├── results/
-├── src/
-├── tests/
-├── .gitignore
-├── LICENSE
-├── README.md
-├── pyproject.toml
-└── requirements.txt
-
 ## Overview
 
 `market_ml_research` is a Python-based machine learning project exploring whether historical market data and engineered financial features can help predict short-term stock returns.
