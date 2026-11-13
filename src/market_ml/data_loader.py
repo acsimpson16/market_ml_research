@@ -26,7 +26,7 @@ class DataLoader:
         Downloads, processes, and optionally saves market data for a given list of tickers 
         over a specified period and interval.
         '''
-        
+        RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
         raw_data = yf.download(self.tickers, period=self.period, interval=self.interval, auto_adjust=True)
         raw_data.to_parquet(RAW_DATA_DIR / self.filename)
         print(f"Downloaded data for {self.tickers}")
