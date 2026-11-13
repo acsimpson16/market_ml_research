@@ -27,7 +27,7 @@ class DataLoader:
         over a specified period and interval.
         '''
         
-        raw_data = yf.download(self.tickers, period=self.period, interval=self.interval)
+        raw_data = yf.download(self.tickers, period=self.period, interval=self.interval, auto_adjust=True)
         raw_data.to_parquet(RAW_DATA_DIR / self.filename)
         print(f"Downloaded data for {self.tickers}")
 
