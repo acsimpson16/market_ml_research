@@ -1,7 +1,5 @@
 # Market ML Research
 
-# market_ml_research
-
 ![CI](https://github.com/acsimpson16/market_ml_research/actions/workflows/ci.yml/badge.svg)
 
 A Python-based machine learning project exploring whether historical market data and engineered financial features can help predict short-term stock returns.
