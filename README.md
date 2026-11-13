@@ -1,5 +1,29 @@
 # Market ML Research
 
+# market_ml_research
+
+![CI](https://github.com/acsimpson16/market_ml_research/actions/workflows/ci.yml/badge.svg)
+
+A Python-based machine learning project exploring whether historical market data and engineered financial features can help predict short-term stock returns.
+
+market_ml_research/
+│
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+│
+├── .vscode/
+├── data/
+├── notebooks/
+├── results/
+├── src/
+├── tests/
+├── .gitignore
+├── LICENSE
+├── README.md
+├── pyproject.toml
+└── requirements.txt
+
 ## Overview
 
 `market_ml_research` is a Python-based machine learning project exploring whether historical market data and engineered financial features can help predict short-term stock returns.
@@ -128,46 +152,23 @@ The same features, prediction horizon, chronological split and evaluation metric
 
 ## Repository Structure
 
-```text
 market_ml_research/
 │
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+│
 ├── .vscode/
-│   └── settings.json
-│
 ├── data/
-│   └── README.md
-│
 ├── notebooks/
-│   ├── Data_prep.ipynb
-│   ├── Exploratory_data_analysis.ipynb
-│   ├── Feature_engineering.ipynb
-│   ├── Modelling_categorical.ipynb
-│   └── Modelling_regression.ipynb
-│
 ├── results/
-│   └── README.md
-│
 ├── src/
-│   └── market_ml/
-│       ├── __init__.py
-│       ├── config.py
-│       ├── data_loader.py
-│       ├── EDA.py
-│       ├── feature_engineering.py
-│       └── models.py
-│
 ├── tests/
-│   ├── test_EDA.py
-│   ├── test_data_loader.py
-│   ├── test_feature_engineering.py
-│   └── test_models.py
-│
 ├── .gitignore
 ├── LICENSE
 ├── README.md
 ├── pyproject.toml
 └── requirements.txt
-```
 
 ### Source code
 
@@ -192,7 +193,8 @@ The `notebooks/` directory contains the project's analysis and modelling workflo
 - `Modelling_categorical.ipynb` – categorical modelling experiments.
 - `Modelling_regression.ipynb` – regression modelling experiments.
 
-### Tests
+
+## Tests
 
 The `tests/` directory contains automated tests for the project's main components:
 
@@ -200,6 +202,35 @@ The `tests/` directory contains automated tests for the project's main component
 - `test_data_loader.py`
 - `test_feature_engineering.py`
 - `test_models.py`
+
+The tests cover data loading and processing, data validation, exploratory data analysis, feature engineering, target generation and model functionality.
+
+The project uses **pytest** for automated testing.
+
+To run the test suite locally, execute the following command from the project root directory:
+
+```bash
+pytest -v
+```
+
+## Continuous Integration
+
+The project uses **GitHub Actions** to automate testing and help maintain code quality.
+
+The CI workflow is defined in `.github/workflows/ci.yml` and runs automatically when:
+
+- Code is pushed to the `main` branch.
+- A pull request is opened against the `main` branch.
+
+The workflow:
+
+1. Checks out the repository.
+2. Sets up the Python environment.
+3. Installs project dependencies.
+4. Installs the project as an editable package.
+5. Runs the automated test suite using pytest.
+
+This ensures that changes are tested in a consistent environment and helps identify errors before they are integrated into the main branch.
 
 ## Technologies
 
