@@ -7,10 +7,10 @@ test_tickers = ["AAPL", "NVDA"]
 test_period = "10y"
 test_interval = "1d"
 
-stock_data = pd.DataFrame({"Date": pd.to_datetime(["2025-01-01","2025-01-02","2025-01-03",]),
-                           "Ticker": ["AAPL", "AAPL", "AAPL"],
-                           "Close": [100, 105, 110], 
-                           "Volume":[100, 200, 300]
+stock_data = pd.DataFrame({"Date": pd.to_datetime(["2025-01-01","2025-01-02","2025-01-03", "2025-01-04", "2025-01-05", "2025-01-06", "2025-01-07", "2025-01-08"]),
+                           "Ticker": ["AAPL", "AAPL", "AAPL", "AAPL", "AAPL", "AAPL", "AAPL", "AAPL"],
+                           "Close": [100, 105, 110, 125, 100, 110, 100, 105], 
+                           "Volume":[100, 200, 300, 400, 250, 100, 300, 320]
                             })
 benchmark_data = pd.DataFrame({"Date": pd.to_datetime(["2025-01-01","2025-01-02","2025-01-03",] * 2),
                                "Ticker": ["SPY"] * 3 + ["QQQ"] * 3,
@@ -103,12 +103,16 @@ def test_benchmark_returns():
 
     assert not benchmark_returns.empty, "Benchmark returns should not be empty"
 
-def test_target_variable(horizon=5):
+def test_target_variable():
     sdata = stock_data
 
     fe = FeatureEngineer(sdata)
-    target = fe.add_target_variable()
+    target = fe.add_target_variable(horizon=5)
 
-    assert not target.empty, "target variable should not be empty"
-    assert "Future_Return_5D" in target.columns, "target should have 'Future_Returns_5D' column"
-    assert "Target_5D" in target.columns, "target should have 'Target_5D' column"
+    assert not target.empty, "Target variable should not be empty"
+
+    assert "Future_Return_5D" in target.columns, "Target should contain 'Future_Return_5D'"
+
+    assert target["Future_Return_5D"].notna().any(), "Target variable should contain valid values"
+
+    assert target["Future_Return_5D"].isna().sum() == 5, "The final five observations should have missing target values"
