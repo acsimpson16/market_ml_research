@@ -152,6 +152,10 @@ The same features, prediction horizon, chronological split and evaluation metric
 
 ## Repository Structure
 
+
+## Repository Structure
+
+```text
 market_ml_research/
 │
 ├── .github/
@@ -159,16 +163,43 @@ market_ml_research/
 │       └── ci.yml
 │
 ├── .vscode/
+│   └── settings.json
+│
 ├── data/
+│   └── README.md
+│
 ├── notebooks/
+│   ├── Data_prep.ipynb
+│   ├── Exploratory_data_analysis.ipynb
+│   ├── Feature_engineering.ipynb
+│   ├── Modelling_categorical.ipynb
+│   └── Modelling_regression.ipynb
+│
 ├── results/
+│   └── README.md
+│
 ├── src/
+│   └── market_ml/
+│       ├── __init__.py
+│       ├── config.py
+│       ├── data_loader.py
+│       ├── EDA.py
+│       ├── feature_engineering.py
+│       └── models.py
+│
 ├── tests/
+│   ├── test_EDA.py
+│   ├── test_data_loader.py
+│   ├── test_feature_engineering.py
+│   └── test_models.py
+│
 ├── .gitignore
 ├── LICENSE
 ├── README.md
 ├── pyproject.toml
 └── requirements.txt
+```
+
 
 ### Source code
 
