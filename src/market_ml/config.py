@@ -46,8 +46,6 @@ TICKER_SECTOR = {# Technology
     "MCD": "Consumer",}
 
 
-TICKERS = list(TICKER_SECTOR.keys())
-
-
+TICKERS = ["AAPL"]
 
 BENCHMARK_TICKERS = ["SPY", "QQQ"]
