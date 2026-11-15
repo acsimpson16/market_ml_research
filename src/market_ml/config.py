@@ -48,4 +48,6 @@ TICKER_SECTOR = {# Technology
 
 TICKERS = list(TICKER_SECTOR.keys())
 
+
+
 BENCHMARK_TICKERS = ["SPY", "QQQ"]

@@ -115,18 +115,14 @@ class FeatureEngineer:
     def add_target_variable(self, horizon=5):
 
         '''
-        Calculates the future returns and target variable over a given horizon. 
+        Calculates the returns and if the returns are positive over a given horizon
         '''
 
-        target_col = f"Future_Return_{horizon}D"
+        #calculating the returns over a given horizon
+        self.data[f"Future_Return_{horizon}D"] = (self.data.groupby("Ticker", sort=False)["Close"].shift(-horizon) / self.data["Close"] - 1)
 
-        self.data[target_col] = (
-        self.data.groupby("Ticker")["Close"].shift(-horizon)/ self.data["Close"] - 1)   
-
-        #self.data[f"Target_{horizon}D"] = (self.data[f"Future_Return_{horizon}D"] > 0).astype(int)
-
-        self.data.loc[self.data[f"Future_Return_{horizon}D"].isna()] = pd.NA #want last 5 rows to be missing data as there is no future information to calculate this. 
-
+        #calculating if the returns are positive (1) or negative (0) over a given horizon
+        self.data[f"Target_{horizon}D_Direction"] = self.data[f"Future_Return_{horizon}D"].gt(0).where(self.data[f"Future_Return_{horizon}D"].notna()).astype("Int64")
         return self.data 
 
     def save_features(self):
