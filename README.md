@@ -2,32 +2,43 @@
 
 ![CI](https://github.com/acsimpson16/market_ml_research/actions/workflows/ci.yml/badge.svg)
 
-A Python-based machine learning project exploring whether historical market data and engineered financial features can help predict short-term stock returns.
+A Python-based machine learning project investigating whether historical market data and engineered financial features can help predict short-term stock price direction.
 
 ## Overview
 
-`market_ml_research` is a Python-based machine learning project exploring whether historical market data and engineered financial features can help predict short-term stock returns.
+`market_ml_research` is an end-to-end data science and machine learning project using historical daily financial market data.
 
-The project uses historical daily data from 25 US-listed companies across five sectors, alongside market benchmarks and volatility indicators. It explores data collection, cleaning, exploratory data analysis, feature engineering and machine learning model evaluation.
+The current modelling work focuses on **predicting whether an individual stock will rise or fall over the next five trading sessions**, using Apple (AAPL) as an initial proof of concept.
 
-The main aim is to build a reproducible end-to-end data science workflow while investigating the challenges of predicting financial market movements.
+The wider project uses historical data from 25 US-listed companies across five sectors, alongside market benchmarks. Once the single-stock workflow is established, the analysis will expand to multiple companies and investigate differences in predictive performance across sectors.
+
+The project aims to demonstrate a reproducible workflow covering:
+
+- Financial data collection and processing.
+- Exploratory data analysis and visualisation.
+- Feature engineering.
+- Classification and time-series modelling.
+- Model evaluation and interpretation.
+- Trading signal generation and backtesting.
+- SQL-based data management and interactive dashboards.
 
 ## Research Question
 
-**Does training machine learning models on stocks within the same sector improve out-of-sample five-day return prediction compared with training on stocks across different sectors?**
+**Can historical price, volume and market-related features help classify whether a stock's closing price will be higher or lower five trading sessions into the future?**
 
 The project investigates:
 
-- Whether historical price and volume features contain useful information about future returns.
+- Whether historical price and volume patterns contain useful information about future price direction.
 - Whether market benchmarks provide additional predictive information.
-- Whether sector-specific models perform differently from a pooled model trained across multiple sectors.
-- How model performance compares with simple baseline predictions.
+- How different machine learning models perform against simple baseline predictions.
+- Whether feature selection improves model performance.
+- Whether model predictions can be translated into meaningful trading signals.
 
 ## Dataset
 
-The project uses historical daily market data from Yahoo Finance, collected using the `yfinance` Python library.
+Historical daily market data is collected from Yahoo Finance using the `yfinance` Python library.
 
-The dataset contains 25 US-listed companies across five sectors:
+The wider dataset contains 25 US-listed companies across five sectors:
 
 | Sector | Companies |
 |---|---|
@@ -43,7 +54,9 @@ Additional market indicators include:
 - **QQQ:** Nasdaq-100 ETF
 - **VIX:** CBOE Volatility Index
 
-The historical stock data currently covers approximately ten years of daily observations.
+The historical stock data covers approximately ten years of daily observations.
+
+**Current modelling scope:** AAPL is being used for the initial classification proof of concept. The wider dataset will support subsequent multi-stock and sector-level experiments.
 
 ## Methodology
 
@@ -80,58 +93,97 @@ Current features include:
 | Return_10D | Ten-day historical return |
 | Return_20D | Twenty-day historical return |
 | Return_60D | Sixty-day historical return |
-| Volatility_20D | Rolling 20-day standard deviation of daily returns |
+| Volatility_5D | Rolling five-day return volatility |
+| Volatility_10D | Rolling ten-day return volatility |
+| Volatility_20D | Rolling twenty-day return volatility |
+| SMA_20D | Twenty-day simple moving average |
+| SMA_50D | Fifty-day simple moving average |
 | Price_to_SMA_20D | Closing price relative to its 20-day moving average |
 | Price_to_SMA_50D | Closing price relative to its 50-day moving average |
+| Volume_Average_20D | Twenty-day average trading volume |
 | Relative_Volume_20D | Daily volume relative to its 20-day average |
 | SPY_Return | Daily return of the S&P 500 ETF |
 | QQQ_Return | Daily return of the Nasdaq-100 ETF |
 
 ### 4. Target variable
 
-The prediction target is the future five-day return:
+The primary modelling target is the direction of the future five-day return.
 
-`Future_Return_5D`
+`Future_Return_5D` represents the percentage change between the current closing price and the closing price five trading sessions later.
 
-This represents the percentage change between the current closing price and the closing price five trading sessions later.
+The classification target is:
+
+`Target_5D_Direction`
+
+- **1:** Positive five-day future return.
+- **0:** Zero or negative five-day future return.
+- **Missing:** Future return cannot be calculated because insufficient future observations are available.
+
+The numerical future return is retained separately for subsequent performance analysis and backtesting, but excluded from the model's input features to prevent data leakage.
 
 ### 5. Model development
 
-The project explores different regression approaches to predict future returns.
+The initial classification experiments use:
 
-Models investigated include:
+- Majority-class baseline.
+- Logistic Regression.
+- Random Forest Classifier.
+- XGBoost Classifier.
 
-- Baseline predictions
-- Linear Regression
-- Random Forest Regressor
-- XGBoost Regressor
+Feature selection is explored using permutation importance, measuring the effect of shuffling individual features on validation ROC-AUC.
 
-Hyperparameter tuning is also explored to assess whether model configuration improves predictive performance.
+A reduced feature set has been investigated to assess whether removing less informative features improves model performance.
+
+The selected-feature XGBoost experiment currently uses:
+
+- Return_20D
+- Return_60D
+- SMA_50D
+- Price_to_SMA_50D
+- Price_to_SMA_20D
+- Volume_Average_20D
+- Volume
+- SPY_Return
+
+The earlier regression experiments are retained in `Modelling_regression.ipynb` as exploratory work.
 
 ### 6. Model evaluation
 
-A chronological train/test split is used to reflect the time-dependent nature of financial data.
+Chronological training, validation and test splits are used to reflect the time-dependent nature of financial data.
 
-A gap is included between the training and testing periods to reduce overlap between the five-day target windows.
+A gap is included between data partitions to reduce overlap between five-day target windows.
 
-Models are evaluated using:
+Classification models are evaluated using:
 
-- Mean Absolute Error (MAE)
-- Root Mean Squared Error (RMSE)
-- R-squared (R²)
+- Accuracy
+- Balanced accuracy
+- Precision
+- Recall
+- F1-score
+- ROC-AUC
+- PR-AUC
+- Confusion matrices
 
-Model performance is also compared with simple baseline predictions.
+Model performance is compared against a simple majority-class baseline.
 
-### 7. Sector-specific modelling
+#### Preliminary validation results
 
-The project investigates whether models trained on companies within the same sector perform differently from a model trained across all 25 companies.
+The following results are from the current AAPL classification experiments. They are validation results, not final out-of-sample test results.
 
-Technology and Energy are the initial sectors selected for this comparison.
+| Model | Accuracy | Balanced accuracy | Precision | Recall | ROC-AUC | PR-AUC |
+|---|---:|---:|---:|---:|---:|---:|
+| Baseline | 0.530 | 0.500 | 0.530 | 1.000 | 0.500 | 0.530 |
+| Logistic Regression | 0.494 | 0.492 | 0.523 | 0.526 | 0.518 | 0.554 |
+| Random Forest | 0.506 | 0.517 | 0.557 | 0.333 | 0.516 | 0.580 |
+| XGBoost | 0.544 | 0.563 | 0.696 | 0.250 | 0.555 | 0.625 |
+| XGBoost Reduced | 0.506 | 0.520 | 0.570 | 0.276 | 0.496 | 0.576 |
+| **XGBoost Reduced Selected** | **0.583** | **0.600** | **0.747** | **0.323** | **0.633** | **0.693** |
 
-The same features, prediction horizon, chronological split and evaluation metrics are retained to make the comparison meaningful.
+The selected-feature XGBoost model currently provides the strongest validation performance across the evaluated metrics.
 
-## Repository Structure
+Further threshold exploration has been performed using the validation set. A threshold of 0.50 is provisionally retained because it achieved the highest balanced accuracy among the thresholds tested.
 
+The final model and threshold will be evaluated on the untouched test set before drawing conclusions about out-of-sample performance.
 
 ## Repository Structure
 
@@ -141,9 +193,6 @@ market_ml_research/
 ├── .github/
 │   └── workflows/
 │       └── ci.yml
-│
-├── .vscode/
-│   └── settings.json
 │
 ├── data/
 │   └── README.md
@@ -180,7 +229,6 @@ market_ml_research/
 └── requirements.txt
 ```
 
-
 ### Source code
 
 Reusable project functionality is organised in the `src/market_ml/` Python package.
@@ -201,9 +249,8 @@ The `notebooks/` directory contains the project's analysis and modelling workflo
 - `Data_prep.ipynb` – data preparation.
 - `Exploratory_data_analysis.ipynb` – exploratory analysis.
 - `Feature_engineering.ipynb` – feature creation.
-- `Modelling_categorical.ipynb` – categorical modelling experiments.
-- `Modelling_regression.ipynb` – regression modelling experiments.
-
+- `Modelling_categorical.ipynb` – classification modelling experiments.
+- `Modelling_regression.ipynb` – earlier regression modelling experiments.
 
 ## Tests
 
@@ -256,6 +303,7 @@ The project currently uses, or is designed around, the following tools:
 - **Plotly** – exploratory data visualisation
 - **Parquet** – efficient data storage
 - **pytest** – automated testing
+- **GitHub Actions** – continuous integration
 
 ## Getting Started
 
@@ -296,34 +344,45 @@ Open the notebooks in the `notebooks/` directory to explore the data preparation
 |---|---|
 | Historical data collection | Implemented |
 | Data processing and validation | Implemented |
-| Exploratory data analysis | In progress |
+| Exploratory data analysis | Implemented / ongoing |
 | Feature engineering | Implemented |
-| Baseline and regression models | Implemented |
-| Hyperparameter tuning | Explored |
-| Sector-specific modelling | In progress |
-| Model interpretation | Planned |
-| Automated data updates | Planned |
+| Target generation for five-day direction | Implemented |
+| Classification baseline and initial models | Implemented |
+| XGBoost feature selection | Explored |
+| Validation threshold exploration | Explored |
+| Final test-set evaluation | Next step |
+| ARIMA time-series modelling | Planned |
+| LSTM modelling | Planned |
+| Trading signal generation | Planned |
+| Backtesting | Planned |
+| SQL database integration | Planned |
 | Interactive dashboard | Planned |
+| Multi-stock and sector-level modelling | Planned |
 
 ## Limitations
 
 Financial market returns are inherently difficult to predict. Historical relationships may not persist, and model performance can vary across companies, sectors and market conditions.
 
-The project therefore focuses on out-of-sample evaluation and comparison against simple baselines rather than assuming that a model with greater complexity will necessarily perform better.
+Classification performance does not necessarily translate into profitable trading strategies. Transaction costs, slippage, execution timing and risk must be considered when evaluating any resulting trading signals.
+
+The project therefore focuses on chronological out-of-sample evaluation and comparison against simple baselines rather than assuming that a more complex model will necessarily perform better.
 
 The results are for research and educational purposes only and should not be interpreted as investment advice.
 
 ## Future Development
 
-Potential extensions include:
+Planned extensions include:
 
-- Further sector-specific model comparisons.
-- Model interpretation using SHAP.
-- Additional feature engineering and market indicators.
-- More robust time-series cross-validation.
-- Automated data updates and database storage.
-- An interactive dashboard for exploring model results.
-- Improved testing, documentation and reproducibility.
+- Final evaluation using the untouched test set.
+- Further time-series modelling using ARIMA.
+- LSTM modelling as a deep learning proof of concept.
+- Model interpretation and further feature analysis.
+- Trading signal generation using predicted probabilities.
+- Backtesting with transaction costs and execution assumptions.
+- SQL database integration for storing market data and model outputs.
+- An interactive dashboard for exploring predictions and strategy performance.
+- Expansion to multiple stocks and sector-specific comparisons.
+- Automated data updates and improved reproducibility.
 
 ---
 
