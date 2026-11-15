@@ -6,20 +6,31 @@ import os
 from IPython.display import display
 from sklearn.model_selection import TimeSeriesSplit 
 
-def split_chronological_data(data, split_ratio=0.8, gap_days=5):
-    '''
-    Takes a dataframe and splits the data into training and test data for a given split ratio
-    '''
+def split_chronological_data(data, train_ratio=0.70, validation_ratio=0.15, gap_days=5):
+    """
+    Splits data chronologically into train, validation and test
+    """
+
     dates = sorted(data["Date"].dropna().unique())
-    split_idx = int(len(dates) * split_ratio)
 
-    test_start_date = dates[split_idx]
-    train_end_date = dates[split_idx - gap_days]
+    train_idx = int(len(dates) * train_ratio)
+    validation_idx = int(len(dates) * (train_ratio + validation_ratio))
 
-    train_data = data[data["Date"] < train_end_date].copy()
+    train_end_date = dates[train_idx - gap_days - 1]
+    validation_start_date = dates[train_idx]
+    validation_end_date = dates[validation_idx - gap_days - 1]
+    test_start_date = dates[validation_idx]
+
+    train_data = data[data["Date"] <= train_end_date].copy()
+
+    validation_data = data[
+        (data["Date"] >= validation_start_date) &
+        (data["Date"] <= validation_end_date)
+    ].copy()
+
     test_data = data[data["Date"] >= test_start_date].copy()
-    
-    return train_data, test_data, test_start_date
+
+    return train_data, validation_data, test_data
 
 def date_based_splits(data, n_splits=5):
     '''
