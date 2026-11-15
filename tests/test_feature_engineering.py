@@ -109,6 +109,11 @@ def test_target_variable():
     fe = FeatureEngineer(sdata)
     target = fe.add_target_variable(horizon=5)
 
+    valid_targets = target["Target_5D_Direction"].dropna()
+
+    expected_direction = target["Future_Return_5D"].gt(0).where(target["Future_Return_5D"].notna())
+    
+
     assert not target.empty, "Target variable should not be empty"
 
     assert "Future_Return_5D" in target.columns, "Target should contain 'Future_Return_5D'"
@@ -116,3 +121,10 @@ def test_target_variable():
     assert target["Future_Return_5D"].notna().any(), "Target variable should contain valid values"
 
     assert target["Future_Return_5D"].isna().sum() == 5, "The final five observations should have missing target values"
+
+    assert "Target_5D_Direction" in target.columns, "Target should contain 'Target_5D_Direction'"
+
+    assert valid_targets.isin([0, 1]).all()
+
+    assert valid_targets.equals(expected_direction.dropna().astype("Int64"))
+
